@@ -1,0 +1,1 @@
+require "sinatra/reloader" if development?
