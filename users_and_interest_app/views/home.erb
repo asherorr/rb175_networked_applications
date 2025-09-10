@@ -1,0 +1,9 @@
+<h2 class="content-subhead">Home</h2>
+
+<ul>
+  <% @users.each do |name, details| %>
+    <li>
+    <a href='/user/<%= name%>'><%= name.to_s.capitalize %></a>
+    </li>
+  <% end %>
+</ul>

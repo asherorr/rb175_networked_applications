@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Sinatra App</title>
+</head>
+<body>
+  <header>
+    <h1>Welcome to My App</h1>
+    <nav>
+      <a href="/">Home</a>
+    </nav>
+    <hr>
+  </header>
+
+  <main>
+    <%= yield %>
+    <%= "There are #{num_users} users with #{num_interests} interests" %>
+  </main>
+
+  <footer>
+    <hr>
+    <p>&copy; <%= Time.now.year %> My Sinatra App</p>
+  </footer>
+</body>
+</html>
