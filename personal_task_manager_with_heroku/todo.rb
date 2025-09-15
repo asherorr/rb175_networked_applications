@@ -13,7 +13,6 @@ before do
 end
 
 get "/" do
-  p session[:lists]
   redirect "/lists"
 end
 
