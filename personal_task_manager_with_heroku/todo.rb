@@ -1,5 +1,6 @@
 require "sinatra"
 require "sinatra/reloader"
+require "sinatra/content_for"
 require "tilt/erubi"
 
 configure do
@@ -12,6 +13,7 @@ before do
 end
 
 get "/" do
+  p session[:lists]
   redirect "/lists"
 end
 
@@ -49,4 +51,11 @@ post "/lists" do
     session[:success] = "The list has been created."
     redirect "/lists"
   end
+end
+
+# View an individual list with todo items
+get "/lists/:id" do
+  id = params[:id].to_i
+  @list = session[:lists][id]
+  erb :list, layout: :layout
 end

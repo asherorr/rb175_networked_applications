@@ -10,6 +10,7 @@
   <body>
     <header>
       <h1>Todo Tracker</h1>
+      <%= yield_content :header_links %>
     </header>
 
 <% if session[:success] %>
