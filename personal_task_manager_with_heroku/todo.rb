@@ -54,7 +54,41 @@ end
 
 # View an individual list with todo items
 get "/lists/:id" do
-  id = params[:id].to_i
-  @list = session[:lists][id]
+  @id = params[:id].to_i
+  @list = session[:lists][@id]
   erb :list, layout: :layout
+end
+
+# Render the edit list form
+get "/lists/:id/edit" do
+  @id = params[:id].to_i
+  @list = session[:lists][@id]
+  erb :edit_list, layout: :layout
+end
+
+# Edit an individual list (change the name of the list)
+post "/lists/:id/edit_list" do
+  @id = params[:id].to_i
+  @list = session[:lists][@id]
+
+  list_name = params[:list_name].strip
+
+  error = error_for_list_name(list_name)
+  if error
+    session[:error] = error
+    erb :edit_list, layout: :layout
+  else
+    @list[:name] = list_name
+    session[:success] = "The list has been updated."
+    redirect "/lists"
+  end
+end
+
+# Delete an individual list
+post "/lists/:id/destroy" do
+  id = params[:id].to_i
+
+  session[:lists].delete_at(id)
+  session[:success] = "The list was deleted."
+  redirect "/lists"
 end
