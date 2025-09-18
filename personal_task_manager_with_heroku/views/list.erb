@@ -10,6 +10,9 @@
     <% @list[:todos].each_with_index do |todo_item, idx| %>
       <li>
         <h3><%= todo_item[:name] %></h3>
+        <form action="/lists/<%= @id %>/delete_todo/<%= idx %>" method="post" class="delete">
+        <button type="submit">Delete</button>
+        </form>
       </li>
     <% end %>
   </ul>

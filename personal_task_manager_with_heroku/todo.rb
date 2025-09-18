@@ -117,3 +117,14 @@ post "/lists/:list_id/todos" do
     redirect "/lists/#{@id}"
   end
 end
+
+# Delete a todo item from a list
+post "/lists/:list_id/delete_todo/:todo_number" do
+  @id = params[:list_id].to_i
+  @list = session[:lists][@id]
+  idx = params[:todo_number].to_i
+
+  @list[:todos].delete_at(idx)
+  session[:success] = "The todo was deleted."
+  redirect "/lists/#{@id}"
+end
