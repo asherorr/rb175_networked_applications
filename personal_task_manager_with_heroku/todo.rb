@@ -130,13 +130,15 @@ post "/lists/:list_id/delete_todo/:todo_number" do
 end
 
 # Mark a todo item as completed or incomplete
-post "/lists/:list_id/complete_todo/:todo_number" do
+post "/lists/:list_id/todos/:todo_number" do
   @id = params[:list_id].to_i
   @list = session[:lists][@id]
   idx = params[:todo_number].to_i
 
   specific_todo_item = @list[:todos][idx]
+  is_completed = params[:completed] == "true"
+  specific_todo_item[:completed] = is_completed
 
-  specific_todo_item[:completed] = !specific_todo_item[:completed]
+  session[:success] = "The todo has been updated."
   redirect "/lists/#{@id}"
 end
