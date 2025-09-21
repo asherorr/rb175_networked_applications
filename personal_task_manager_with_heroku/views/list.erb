@@ -3,12 +3,17 @@
     <h2><%= @list[:name] %></h2>
     <ul>
       <li><a class="edit" href="/lists/<%= params[:id] %>/edit">Edit List</a></li>
+      <li>
+        <form action="/lists/<%= @id %>/complete_all" method="post">
+        <button class="check" type="submit" value="true">Complete All</button>
+        </form>
+      </li>
     </ul>
   </header>
 
   <ul> 
     <% @list[:todos].each_with_index do |todo_item, idx| %>
-      <li class="<%= 'complete' if todo_item[:completed] %>"%>
+      <li class="<%= 'complete' if todo_item[:completed] %>">
         <form action="/lists/<%= @id %>/todos/<%= idx %>" method="post" class="check">
           <input type="hidden" name="completed" value="<%= !todo_item[:completed] %>" />
           <button type="submit">Complete</button>
