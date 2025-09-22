@@ -8,6 +8,31 @@ configure do
   set :session_secret, SecureRandom.hex(32)
 end
 
+helpers do
+  def all_items_completed?(list)
+    incomplete_todos = list[:todos].any? {|hash| hash[:completed] == false}
+    list[:todos].size > 0 && incomplete_todos == false
+  end
+
+  def list_class(list)
+    "complete" if all_items_completed?(list)
+  end
+
+  def todos_count(list)
+    list[:todos].size
+  end
+
+  def todos_completed_count(list)
+    completed_todos = list[:todos].select {|todo| todo[:completed] == true}
+    completed_todos.size
+  end
+
+  def todos_remaining_count(list)
+    remaining_todos = list[:todos].select {|todo| todo[:completed] == false}
+    remaining_todos.size
+  end
+end
+
 before do
   session[:lists] ||= []
 end
