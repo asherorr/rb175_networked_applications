@@ -9,13 +9,13 @@ configure do
 end
 
 helpers do
-  def all_items_completed?(list)
+  def list_complete?(list)
     incomplete_todos = list[:todos].any? {|hash| hash[:completed] == false}
     list[:todos].size > 0 && incomplete_todos == false
   end
 
   def list_class(list)
-    "complete" if all_items_completed?(list)
+    "complete" if list_complete?(list)
   end
 
   def todos_count(list)
@@ -31,6 +31,10 @@ helpers do
     remaining_todos = list[:todos].select {|todo| todo[:completed] == false}
     remaining_todos.size
   end
+
+  def sort_lists_with_index(lists)
+    lists.each_with_index.sort_by { |(list, _i)| list_complete?(list) ? 1 : 0 }
+  end
 end
 
 before do
@@ -41,9 +45,16 @@ get "/" do
   redirect "/lists"
 end
 
+#helper method sort_lists(lists)
+  #sort each hash in the sessions list
+  #sort it with the <=> based on whether or not the list_complete? method returns true
+  #
+
+
 # View list of lists
 get "/lists" do
-  @lists = session[:lists]
+  p session[:lists]
+  @lists_with_idx = sort_lists_with_index(session[:lists])
   erb :lists, layout: :layout
 end
 
@@ -180,3 +191,10 @@ post "/lists/:id/complete_all" do
   session[:success] = "Each todo has been marked as completed."
   redirect "/lists/#{@list_id}"
 end
+
+#We want now to modify the order on the lists page and the individual list page
+#On an individual list page, we want the uncompleted ones to be at the top.
+#On the lists page, we want the completed lists to appear last
+
+#Use view helpers to show the items 
+#in the order we want to, without modifying the route.
