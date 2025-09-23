@@ -32,8 +32,12 @@ helpers do
     remaining_todos.size
   end
 
-  def sort_lists_with_index(lists)
+  def sort_lists_with_index(lists, &block)
     lists.each_with_index.sort_by { |(list, _i)| list_complete?(list) ? 1 : 0 }
+  end
+
+  def sort_todos_with_index(todos)
+    todos.each_with_index.sort_by { |(todo, _i)| todo[:completed] ? 1 : 0 }
   end
 end
 
@@ -45,15 +49,8 @@ get "/" do
   redirect "/lists"
 end
 
-#helper method sort_lists(lists)
-  #sort each hash in the sessions list
-  #sort it with the <=> based on whether or not the list_complete? method returns true
-  #
-
-
 # View list of lists
 get "/lists" do
-  p session[:lists]
   @lists_with_idx = sort_lists_with_index(session[:lists])
   erb :lists, layout: :layout
 end
