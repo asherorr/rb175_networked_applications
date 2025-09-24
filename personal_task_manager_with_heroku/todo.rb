@@ -188,10 +188,3 @@ post "/lists/:id/complete_all" do
   session[:success] = "Each todo has been marked as completed."
   redirect "/lists/#{@list_id}"
 end
-
-#We want now to modify the order on the lists page and the individual list page
-#On an individual list page, we want the uncompleted ones to be at the top.
-#On the lists page, we want the completed lists to appear last
-
-#Use view helpers to show the items 
-#in the order we want to, without modifying the route.
