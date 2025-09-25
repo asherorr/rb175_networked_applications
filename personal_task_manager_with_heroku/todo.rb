@@ -78,6 +78,15 @@ def error_for_todo(name)
   end
 end
 
+# Load a list and return an error if user attempts to access an invalid list
+def load_list(index)
+  list = session[:lists][index] if index && session[:lists][index]
+  return list if list
+
+  session[:error] = "The specified list was not found."
+  redirect "/lists"
+end
+
 # Create a new list
 post "/lists" do
   list_name = params[:list_name].strip
@@ -96,21 +105,21 @@ end
 # View an individual list with todo items
 get "/lists/:id" do
   @id = params[:id].to_i
-  @list = session[:lists][@id]
+  @list = load_list(@id)
   erb :list, layout: :layout
 end
 
 # Render the edit list form
 get "/lists/:id/edit" do
   @id = params[:id].to_i
-  @list = session[:lists][@id]
+  @list = load_list(@id)
   erb :edit_list, layout: :layout
 end
 
 # Edit an individual list (change the name of the list)
 post "/lists/:id/edit_list" do
   @id = params[:id].to_i
-  @list = session[:lists][@id]
+  @list = load_list(@id)
 
   list_name = params[:list_name].strip
 
@@ -137,7 +146,7 @@ end
 # Add an new todo item to a list
 post "/lists/:list_id/todos" do
   @id = params[:list_id].to_i
-  @list = session[:lists][@id]
+  @list = load_list(@id)
   text = params[:todo].strip
 
   error = error_for_todo(text)
@@ -154,7 +163,7 @@ end
 # Delete a todo item from a list
 post "/lists/:list_id/delete_todo/:todo_number" do
   @id = params[:list_id].to_i
-  @list = session[:lists][@id]
+  @list = load_list(@id)
   idx = params[:todo_number].to_i
 
   @list[:todos].delete_at(idx)
@@ -165,7 +174,7 @@ end
 # Mark a todo item as completed or incomplete
 post "/lists/:list_id/todos/:todo_number" do
   @id = params[:list_id].to_i
-  @list = session[:lists][@id]
+  @list = load_list(@id)
   idx = params[:todo_number].to_i
 
   specific_todo_item = @list[:todos][idx]
@@ -179,7 +188,7 @@ end
 # Mark all items in a todo list as completed
 post "/lists/:id/complete_all" do
   @list_id = params[:id].to_i
-  @list = session[:lists][@list_id]
+  @list = load_list(@list_id)
 
   @list[:todos].each_with_index do |todo_item, idx|
     todo_item[:completed] = true
