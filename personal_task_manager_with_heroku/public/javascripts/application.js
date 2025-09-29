@@ -1,3 +1,4 @@
+// public/javascripts/application.js
 $(function () {
   $("form.delete").on("submit", function (event) {
     event.preventDefault();
@@ -8,17 +9,24 @@ $(function () {
 
     var form = $(this);
 
-    $.ajax({
+    var request = $.ajax({
       url: form.attr("action"),
       method: form.attr("method"),
       headers: { "X-Requested-With": "XMLHttpRequest" }
-      // no data needed for this route; Content-Length: 0 is fine
-    })
-      .done(function (_data, _textStatus, _jqXHR) {
+    });
+
+    request.done(function (data, textStatus, jqXHR) {
+      if (jqXHR.status === 204) {
+        // Successful AJAX deletion, no content returned
         form.parent("li").remove();
-      })
-      .fail(function (_jqXHR) {
-        alert("Sorry, something went wrong deleting that item.");
-      });
+      } else if (jqXHR.status === 200) {
+        // Server returned a redirect page
+        document.location = data;
+      }
+    });
+
+    request.fail(function (_jqXHR, _textStatus, _errorThrown) {
+      alert("Sorry, something went wrong deleting that item.");
+    });
   });
 });
