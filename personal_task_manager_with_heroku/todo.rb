@@ -36,12 +36,10 @@ helpers do
     remaining_todos.size
   end
 
-  def sort_lists_with_index(lists, &block)
-    lists.each_with_index.sort_by { |(list, _i)| list_complete?(list) ? 1 : 0 }
-  end
+  def sort_lists(lists, &block)
+    complete_lists, incomplete_lists = lists.partition { |list| list_complete?(list) }
 
-  def sort_todos_with_index(todos)
-    todos.each_with_index.sort_by { |(todo, _i)| todo[:completed] ? 1 : 0 }
+    incomplete_lists + complete_lists
   end
 
   def sort_todos(todos, &block)
@@ -57,13 +55,18 @@ def next_todo_id(todos)
   max + 1
 end
 
+def next_list_id(lists)
+  max = lists.map { |list| list[:id] }.max || 0
+  max + 1
+end
+
 get "/" do
   redirect "/lists"
 end
 
 # View list of lists
 get "/lists" do
-  @lists_with_idx = sort_lists_with_index(session[:lists])
+  @lists = sort_lists(session[:lists])
   erb :lists, layout: :layout
 end
 
@@ -91,8 +94,8 @@ def error_for_todo(name)
 end
 
 # Load a list and return an error if user attempts to access an invalid list
-def load_list(index)
-  list = session[:lists][index] if index && session[:lists][index]
+def load_list(list_id)
+  list = session[:lists].find { |l| l[:id] == list_id }
   return list if list
 
   session[:error] = "The specified list was not found."
@@ -108,7 +111,8 @@ post "/lists" do
     session[:error] = error
     erb :new_list, layout: :layout
   else
-    session[:lists] << {name: list_name, todos: []}
+    list_id = next_list_id(session[:lists])
+    session[:lists] << {id: list_id, name: list_name, todos: []}
     session[:success] = "The list has been created."
     redirect "/lists"
   end
@@ -150,7 +154,7 @@ end
 post "/lists/:id/destroy" do
   id = params[:id].to_i
 
-  session[:lists].delete_at(id)
+  session[:lists].reject! { |list| list[:id] == id }
   if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
     "/lists"
   else
@@ -182,7 +186,7 @@ post "/lists/:list_id/delete_todo/:todo_number" do
   @id = params[:list_id].to_i
   @list = load_list(@id)
 
-  todo_id = params[:id].to_i
+  todo_id = params[:todo_number].to_i
   @list[:todos].reject! { |todo| todo[:id] == todo_id }
 
   if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
