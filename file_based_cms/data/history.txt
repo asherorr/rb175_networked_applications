@@ -1,0 +1,4 @@
+- Ruby was born in the mid-1990s under Yukihiro “Matz” Matsumoto  
+- It draws inspiration from Perl, Smalltalk, Lisp — in pursuit of intuitive, human-friendly code  
+- Over time it grew into a full ecosystem: gems, Rails, REPL tools, and more  
+- It’s always evolving — with newer parsers, JITs, concurrency tweaks, and language tweaks keeping it fresh  
