@@ -3,11 +3,12 @@ require "sinatra/reloader"
 require "sinatra/content_for"
 require "tilt/erubi"
 require "securerandom"
+require "redcarpet"
 
 configure do
   enable :sessions
   set :session_secret, SecureRandom.hex(32)
-  set :data_path, File.expand_path("../data", __dir__)
+  set :data_path, File.expand_path("data", __dir__)
 end
 
 configure :test do
@@ -20,10 +21,24 @@ helpers do
     return unless session[:error]
     %(<div class="flash error"><h1>#{session.delete(:error)}</h1></div>)
   end
+
+  def render_file(file_path)
+    contents = File.read(file_path)
+    if is_markdown_file?(file_path)
+      markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
+      markdown.render(contents)
+    else
+      contents
+    end
+  end
 end
 
 def get_all_files
   Dir.glob(File.join(settings.data_path, "*")).map { |path| File.basename(path) }
+end
+
+def is_markdown_file?(file_name)
+  file_name[-3..-1].downcase == ".md"
 end
 
 get "/" do
@@ -34,9 +49,9 @@ end
 get "/data/:file" do
   file_name = params[:file]
   file_path = File.join(settings.data_path, file_name)
-
-  @contents = File.read(file_path)
+  @contents = render_file(file_path)
   erb :file
+
   rescue Errno::ENOENT
     session[:error] = "The file '#{file_name}' doesn't exist."
     redirect "/"

@@ -19,6 +19,7 @@ class AppTest < Minitest::Test
     File.write(File.join(@data_path, "about.txt"),   "Ruby is...")
     File.write(File.join(@data_path, "changes.txt"), "Recent Ruby changes")
     File.write(File.join(@data_path, "history.txt"), "History of Ruby")
+    File.write(File.join(@data_path, "about.md"), "# Introduction to Ruby")
   end
 
   def teardown
@@ -34,15 +35,23 @@ class AppTest < Minitest::Test
   end
 
   def test_viewing_text_document
-    get "data/about.txt"
+    get "/data/about.txt"
     assert_equal 200, last_response.status
     assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
     assert_includes last_response.body, "Ruby"
   end
 
   def test_index_if_user_views_nonexistent_file
-    nonexistent_file = "data/#{Time.now.to_i}_#{SecureRandom.hex(2)}.txt"
-    get "data/#{nonexistent_file}"
+    nonexistent_file = "/data/#{Time.now.to_i}_#{SecureRandom.hex(2)}.txt"
+    get "/data/#{nonexistent_file}"
     assert_equal 302, last_response.status
+  end
+
+  def test_markdown_file_converts_to_html
+    get "/data/about.md"
+    assert_equal 200, last_response.status
+    assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
+
+    assert_includes last_response.body, "<h1>Introduction to Ruby</h1>"
   end
 end
