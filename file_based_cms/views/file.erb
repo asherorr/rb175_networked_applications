@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Index</title>
+  <title><%= params[:file] %></title>
 </head>
 <body>
-  <pre><%= @contents %></pre>
+  <% if params[:file].downcase.end_with?(".html", ".htm", ".md") %>
+    <%= @contents %>      
+  <% else %>
+    <pre><%= @contents %></pre>
+  <% end %>
 </body>
 </html>
+
+

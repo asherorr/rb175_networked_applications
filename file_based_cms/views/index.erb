@@ -5,11 +5,12 @@
   <title>Index</title>
 </head>
 <body>
-  <%= display_flash %>
+  <%== display_flash %>
   <ul>
     <% @files.each do |file| %>
       <li>
         <a href="data/<%= file %>"><%= file %></a>
+        <a href="data/<%= file %>/edit">Edit</a>
       </li>
     <% end %>
   </ul>

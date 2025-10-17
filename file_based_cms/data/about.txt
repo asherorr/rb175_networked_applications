@@ -1,2 +1,3 @@
 - Ruby is a dynamic, expressive language built for developers of all skill levels
+
 - It’s got elegant syntax, powerful metaprogramming, and a vibrant community of programmers worldwide

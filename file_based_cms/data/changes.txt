@@ -1,4 +1,7 @@
 - Here are some recent changes:
+
 - Ruby 3.4.4 released: fixes a YJIT bug tied to local variables and resolves a Windows build issue using GCC 15 :contentReference[oaicite:0]{index=0}  
-- Other bugfixes and stability improvements packed in (mostly behind the scenes) :contentReference[oaicite:1]{index=1}  
+
+- Other bugfixes and stability improvements packed in (mostly behnl,kind the scenes) :contentReference[oaicite:1]{index=1}  
+
 - Note: 3.4 includes new language tweaks like anonymous `it` block arguments, `**nil` unpacking, and frozen string literals planned for 3.5 :contentReference[oaicite:2]{index=2}  

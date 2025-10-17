@@ -1,7 +1,6 @@
 # Introduction to Ruby
 
-Ruby is a dynamic, open-source programming language with a focus on simplicity and productivity.  
-It was created by Yukihiro "Matz" Matsumoto in the mid-1990s.
+Ruby is a dynamic, open-source programming language with a focus on simplicity and productivity.
 
 ## Key Features
 
@@ -10,16 +9,7 @@ It was created by Yukihiro "Matz" Matsumoto in the mid-1990s.
 - **Dynamic Typing:** Types are checked at runtime, not in advance.
 - **Metaprogramming:** Ruby can modify its own structure and behavior while running.
 
-## Common Uses
-
-Ruby is widely used for:
-- Web development (especially with the Ruby on Rails framework)
-- Scripting and automation
-- Data processing
-- Prototyping and teaching programming concepts
-
 ## Example Code
 
 ```ruby
 puts "Hello, world!"
-```
