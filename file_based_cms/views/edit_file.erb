@@ -35,7 +35,7 @@
   <h1>Editing: <%= params[:file_name] %></h1>
 
   <form action="/data/<%= params[:file_name] %>/edit_file" method="post">
-    <textarea name="content" id="content"><%= h(@contents) %></textarea>
+    <textarea name="content" id="content"><%= @contents %></textarea>
     <br>
     <button type="submit">Save Changes</button>
   </form>
