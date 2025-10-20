@@ -37,6 +37,7 @@ helpers do
     nil
   end
 
+
   def render_file(file_path)
     contents = File.read(file_path)
     if is_markdown_file?(file_path)

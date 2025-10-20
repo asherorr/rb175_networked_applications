@@ -1,16 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title><%= params[:file] %></title>
-</head>
-<body>
-  <% if params[:file].downcase.end_with?(".html", ".htm", ".md") %>
-    <%= @contents %>      
-  <% else %>
-    <pre><%= @contents %></pre>
-  <% end %>
-</body>
-</html>
+<% @title = params[:file] %>
+
+<% if params[:file].downcase.end_with?(".html", ".htm", ".md") %>
+  <%= @contents %>
+<% else %>
+  <pre><%= @contents %></pre>
+<% end %>
+
 
 

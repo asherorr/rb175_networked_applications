@@ -1,19 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Index</title>
-</head>
-<body>
-  <%== display_flash %>
-  <ul>
-    <% @files.each do |file| %>
-      <li>
-        <a href="data/<%= file %>"><%= file %></a>
-        <a href="data/<%= file %>/edit">Edit</a>
-      </li>
-    <% end %>
-  </ul>
-</body>
-</html>
+<% @title = "Index" %>
 
+<ul>
+  <% @files.each do |file| %>
+    <li>
+      <a href="/data/<%= file %>"><%= file %></a>
+      <a href="/data/<%= file %>/edit">Edit</a>
+    </li>
+  <% end %>
+</ul>
