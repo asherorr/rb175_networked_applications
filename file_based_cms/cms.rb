@@ -126,6 +126,19 @@ post "/new_file" do
 
   file_path = File.join(settings.data_path, filename)
   File.write(file_path, "")
-  session[:success] = "#{filename} was created."  # it's a create, not an update
+  session[:success] = "#{filename} was created."
   redirect "/"
+end
+
+post "/data/:file/delete" do
+  filename = params[:file].strip
+  file_path = File.join(settings.data_path, filename)
+
+  if File.exist?(file_path)
+    File.delete(file_path)
+    session[:success] = "#{filename} was deleted."
+    redirect "/"
+  else
+    session[:error] = "The file doesn't exist."
+  end
 end

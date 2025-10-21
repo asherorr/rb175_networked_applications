@@ -82,7 +82,6 @@ class AppTest < Minitest::Test
   end
 
   def test_new_document_creation
-    #access post route that triggers the creation of a new document
     post "/new_file", file_name: "newfile.txt"
     assert_equal 302, last_response.status
     follow_redirect!

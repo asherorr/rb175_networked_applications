@@ -5,6 +5,9 @@
     <li>
       <a href="/data/<%= file %>"><%= file %></a>
       <a href="/data/<%= file %>/edit">Edit</a>
+      <form action="/data/<%= file %>/delete" method="post" style="display:inline">
+      <button type="submit" onclick="return confirm('Delete <%= file %>?')">Delete</button>
+      </form>
     </li>
   <% end %>
 </ul>
