@@ -80,4 +80,13 @@ class AppTest < Minitest::Test
     path = File.join(@data_path, "changes.txt")
     assert_includes File.read(path), "new content"
   end
+
+  def test_new_document_creation
+    #access post route that triggers the creation of a new document
+    post "/new_file", file_name: "newfile.txt"
+    assert_equal 302, last_response.status
+    follow_redirect!
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'newfile.txt was created.'
+  end
 end

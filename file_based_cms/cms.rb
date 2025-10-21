@@ -37,7 +37,6 @@ helpers do
     nil
   end
 
-
   def render_file(file_path)
     contents = File.read(file_path)
     if is_markdown_file?(file_path)
@@ -61,6 +60,11 @@ end
 
 def is_markdown_file?(file_name)
   file_name[-3..-1].downcase == ".md"
+end
+
+def has_valid_file_extension?(name)
+  ext = File.extname(name.to_s).downcase
+  [".txt", ".md"].include?(ext)
 end
 
 get "/" do
@@ -97,5 +101,31 @@ post "/data/:file_name/edit_file" do
   
   File.write(file_path, params[:content])
   session[:success] = "#{params[:file_name]} has been updated."
+  redirect "/"
+end
+
+get "/new_file" do
+  content_type :html
+  erb :new_file
+end
+
+post "/new_file" do
+  filename = params[:file_name].to_s.strip
+
+  if filename.empty?
+    session[:error] = "A name is required."
+    status 422
+    return erb :new_file
+  end
+
+  unless has_valid_file_extension?(filename)
+    session[:error] = "The file must end with a file extension of either .txt or .md"
+    status 422
+    return erb :new_file
+  end
+
+  file_path = File.join(settings.data_path, filename)
+  File.write(file_path, "")
+  session[:success] = "#{filename} was created."  # it's a create, not an update
   redirect "/"
 end
