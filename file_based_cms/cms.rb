@@ -140,5 +140,6 @@ post "/data/:file/delete" do
     redirect "/"
   else
     session[:error] = "The file doesn't exist."
+    redirect "/"
   end
 end

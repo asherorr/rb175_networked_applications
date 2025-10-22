@@ -20,6 +20,7 @@ class AppTest < Minitest::Test
     File.write(File.join(@data_path, "changes.txt"), "Recent Ruby changes")
     File.write(File.join(@data_path, "history.txt"), "History of Ruby")
     File.write(File.join(@data_path, "about.md"), "# Introduction to Ruby")
+    File.write(File.join(@data_path, "file_to_delete.md"), "# This file will be deleted.")
   end
 
   def teardown
@@ -87,5 +88,26 @@ class AppTest < Minitest::Test
     follow_redirect!
     assert_equal 200, last_response.status
     assert_includes last_response.body, 'newfile.txt was created.'
+  end
+
+  def test_deleting_document
+    # Test that file exists
+    file_name = "file_to_delete.md"
+    file_path = File.join(@data_path, file_name)
+    assert File.exist?(file_path)
+
+    # Test that file is deleted
+    post "/data/#{file_name}/delete"
+    refute File.exist?(file_path)
+
+    # Test redirection to index page upon deletion
+    assert_equal 302, last_response.status
+    follow_redirect!
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "#{file_name} was deleted."
+
+    # Test that index page no longer displays the deleted file
+    get "/"
+    refute_includes last_response.body, "#{file_name}"
   end
 end
