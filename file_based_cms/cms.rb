@@ -4,6 +4,7 @@ require "sinatra/content_for"
 require "tilt/erubi"
 require "securerandom"
 require "redcarpet"
+require "cgi"
 
 configure do
   enable :sessions
@@ -51,6 +52,10 @@ helpers do
     else
       contents                    # plain text
     end
+  end
+
+  def h(text)
+    CGI.escapeHTML(text.to_s)
   end
 end
 
@@ -142,4 +147,28 @@ post "/data/:file/delete" do
     session[:error] = "The file doesn't exist."
     redirect "/"
   end
+end
+
+get "/sign_in" do
+  erb :sign_in
+end
+
+post "/sign_in" do
+  username_entry = params[:username]
+  password_entry = params[:password]
+
+  if username_entry == "admin" && password_entry == "secret"
+    session[:username] = "admin"
+    session[:success] = "Welcome!"
+    redirect "/"
+  else
+    session[:error] = "Invalid credentials"
+    redirect "/sign_in"
+  end
+end
+
+post "/sign_out" do
+  session[:username] = ""
+  session[:success] = "You have been signed out."
+  redirect "/"
 end

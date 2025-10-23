@@ -12,3 +12,13 @@
   <% end %>
 </ul>
 <p><a href="/new_file">New File</a></p>
+<% if session[:username] == "admin" %>
+    </p><em>Signed in as <%= session[:username] %></em></p>
+    <form action="/sign_out" method="post" style="display:inline">
+    <button type="submit" onclick="return confirm('Sign out?')">Sign Out</button>
+    </form>
+<% else %>
+    <form action="/sign_in" method="get" style="display:inline">
+    <button type="submit">Sign In</button>
+    </form>
+<% end %>

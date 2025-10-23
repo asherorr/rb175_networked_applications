@@ -110,4 +110,39 @@ class AppTest < Minitest::Test
     get "/"
     refute_includes last_response.body, "#{file_name}"
   end
+
+  def test_sign_in_form
+    get "/sign_in"
+    assert_includes last_response.body, '<button type="submit">Sign In</button>'
+  end
+
+  def test_sign_in_with_bad_credentials
+    post "/sign_in", username: "not_admin", password: "not_secret"
+    assert_equal 302, last_response.status
+    follow_redirect!
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'Invalid credentials'
+  end
+
+  def test_sign_in_with_correct_credentials
+    post "/sign_in", username: "admin", password:"secret"
+    assert_equal 302, last_response.status
+
+    follow_redirect!
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'Welcome!'
+
+    assert_equal "admin", last_request.env["rack.session"][:username]
+  end
+
+  def test_sign_out_form
+    post "/sign_out"
+    assert_equal "", last_request.env["rack.session"][:username]
+    assert_equal 302, last_response.status
+    
+    follow_redirect!
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'You have been signed out.'
+    assert_includes last_response.body, "Sign In"
+  end
 end

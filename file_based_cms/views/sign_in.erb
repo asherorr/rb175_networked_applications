@@ -1,0 +1,61 @@
+<% @title = "Sign In" %>
+
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    margin: 2rem;
+  }
+
+  form {
+    margin-top: 1rem;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  textarea#file_name {
+    width: 250px;        /* smaller width */
+    height: 1.8em;       /* small height (1 line) */
+    resize: none;        /* disable manual resizing */
+    font-size: 1rem;
+    font-family: sans-serif;
+    padding: 0.25rem 0.5rem;
+  }
+
+  button {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+</style>
+
+<form action="/sign_in" method="post">
+  <div>
+    <label for="username">Username:</label>
+    <input 
+      type="text" 
+      id="username" 
+      name="username" 
+      value="<%= h(@username) if @username %>" 
+      required
+    >
+  </div>
+
+  <div>
+    <label for="password">Password:</label>
+    <input 
+      type="password" 
+      id="password" 
+      name="password" 
+      required
+    >
+  </div>
+
+  <div>
+    <button type="submit">Sign In</button>
+  </div>
+</form>
