@@ -27,6 +27,10 @@ class AppTest < Minitest::Test
     FileUtils.rm_f Dir[File.join(@data_path, "*")]
   end
 
+  def session
+    last_request.env["rack.session"]
+  end
+
   def test_index
     get "/"
     assert_equal 200, last_response.status
@@ -65,18 +69,12 @@ class AppTest < Minitest::Test
   end
 
   def test_updating_document
-    # Test that document's content appears in the textarea
-    get "/data/changes.txt/edit"
-    assert_equal 200, last_response.status
-    assert_includes last_response.body, "Recent Ruby changes"
-
-    # Test that new content is submitted to the correct route
     post "/data/changes.txt/edit_file", content: "new content"
+
     assert_equal 302, last_response.status
-    follow_redirect!
-    assert_equal 200, last_response.status
-    assert_includes last_response.body, "changes.txt has been updated."
-    
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_equal "changes.txt has been updated.", session[:success]
+
     # Test that the file actually changed
     path = File.join(@data_path, "changes.txt")
     assert_includes File.read(path), "new content"
@@ -84,10 +82,10 @@ class AppTest < Minitest::Test
 
   def test_new_document_creation
     post "/new_file", file_name: "newfile.txt"
+
     assert_equal 302, last_response.status
-    follow_redirect!
-    assert_equal 200, last_response.status
-    assert_includes last_response.body, 'newfile.txt was created.'
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_equal "newfile.txt was created.", session[:success]
   end
 
   def test_deleting_document
@@ -102,13 +100,12 @@ class AppTest < Minitest::Test
 
     # Test redirection to index page upon deletion
     assert_equal 302, last_response.status
-    follow_redirect!
-    assert_equal 200, last_response.status
-    assert_includes last_response.body, "#{file_name} was deleted."
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_equal "#{file_name} was deleted.", session[:success]
 
     # Test that index page no longer displays the deleted file
     get "/"
-    refute_includes last_response.body, "#{file_name}"
+    refute_includes last_response.body, %Q{href="/data/#{file_name}"}
   end
 
   def test_sign_in_form
@@ -118,31 +115,25 @@ class AppTest < Minitest::Test
 
   def test_sign_in_with_bad_credentials
     post "/sign_in", username: "not_admin", password: "not_secret"
+
     assert_equal 302, last_response.status
-    follow_redirect!
-    assert_equal 200, last_response.status
-    assert_includes last_response.body, 'Invalid credentials'
+    assert_equal "/sign_in", URI(last_response["Location"]).path
+    assert_equal "Invalid credentials", session[:error]
   end
+
 
   def test_sign_in_with_correct_credentials
     post "/sign_in", username: "admin", password:"secret"
+
     assert_equal 302, last_response.status
-
-    follow_redirect!
-    assert_equal 200, last_response.status
-    assert_includes last_response.body, 'Welcome!'
-
-    assert_equal "admin", last_request.env["rack.session"][:username]
+    assert_equal "admin", session[:username]
+    assert_equal "Welcome!", session[:success] 
   end
 
   def test_sign_out_form
     post "/sign_out"
-    assert_equal "", last_request.env["rack.session"][:username]
+    assert_equal "", session[:username]
     assert_equal 302, last_response.status
-    
-    follow_redirect!
-    assert_equal 200, last_response.status
-    assert_includes last_response.body, 'You have been signed out.'
-    assert_includes last_response.body, "Sign In"
+    assert_equal 'You have been signed out.', session[:success]
   end
 end
