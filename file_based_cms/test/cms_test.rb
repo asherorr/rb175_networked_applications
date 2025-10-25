@@ -31,6 +31,16 @@ class AppTest < Minitest::Test
     last_request.env["rack.session"]
   end
 
+  def admin_session
+    { "rack.session" => { username: "admin" } }
+  end
+
+  def test_editing_document
+    get "/changes.txt/edit", {}, admin_session
+
+    assert_equal 200, last_response.status
+  end
+
   def test_index
     get "/"
     assert_equal 200, last_response.status
@@ -61,7 +71,7 @@ class AppTest < Minitest::Test
   end
 
   def test_editing_document
-    get "/data/changes.txt/edit"
+    get "/data/changes.txt/edit", {}, admin_session
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, "<textarea"
@@ -69,7 +79,7 @@ class AppTest < Minitest::Test
   end
 
   def test_updating_document
-    post "/data/changes.txt/edit_file", content: "new content"
+    post "/data/changes.txt/edit_file", { content: "new content" }, admin_session
 
     assert_equal 302, last_response.status
     assert_equal "/", URI(last_response["Location"]).path
@@ -81,7 +91,7 @@ class AppTest < Minitest::Test
   end
 
   def test_new_document_creation
-    post "/new_file", file_name: "newfile.txt"
+    post "/new_file", { file_name: "newfile.txt" }, admin_session
 
     assert_equal 302, last_response.status
     assert_equal "/", URI(last_response["Location"]).path
@@ -95,7 +105,7 @@ class AppTest < Minitest::Test
     assert File.exist?(file_path)
 
     # Test that file is deleted
-    post "/data/#{file_name}/delete"
+    post "/data/#{file_name}/delete", {}, admin_session
     refute File.exist?(file_path)
 
     # Test redirection to index page upon deletion
@@ -135,5 +145,35 @@ class AppTest < Minitest::Test
     assert_equal "", session[:username]
     assert_equal 302, last_response.status
     assert_equal 'You have been signed out.', session[:success]
+  end
+
+  def test_restricting_actions_to_signed_in_user
+    error_message = "You must be signed in to do that."
+
+    # 1) GET the edit page (should be blocked)
+    get "/data/changes.txt/edit"
+    assert_equal 302, last_response.status
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_equal error_message, session[:error]
+
+    # 2) POST an update to a file (should be blocked - file unchanged)
+    post "/data/changes.txt/edit_file", { content: "hacked!" }
+    assert_equal 302, last_response.status
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_equal error_message, session[:error]
+
+    changes_path = File.join(@data_path, "changes.txt")
+    refute_includes File.read(changes_path), "hacked!"  # ensure no unauthorized write
+
+    # 3) POST delete a file (should be blocked - file still exists)
+    target = "about.md"
+    target_path = File.join(@data_path, target)
+    assert File.exist?(target_path)  # precondition
+
+    post "/data/#{target}/delete"
+    assert_equal 302, last_response.status
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_equal error_message, session[:error]
+    assert File.exist?(target_path)  # ensure not deleted
   end
 end
