@@ -193,7 +193,7 @@ class AppTest < Minitest::Test
     refute_includes last_response.body, "users.yml" # test that users.yml is not displayed on the index page
 
     get "/", {}, admin_session # issue a get request to index as the admin
-    assert_includes last_response.body, "users.yml" # refute that the response body includes users.yml
+    assert_includes last_response.body, "users.yml" # assert that the response body includes users.yml
   end
 
   def test_only_admin_can_edit_yaml
