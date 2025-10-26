@@ -21,6 +21,9 @@ class AppTest < Minitest::Test
     File.write(File.join(@data_path, "history.txt"), "History of Ruby")
     File.write(File.join(@data_path, "about.md"), "# Introduction to Ruby")
     File.write(File.join(@data_path, "file_to_delete.md"), "# This file will be deleted.")
+
+    users = { "admin" => "secret", "asher" => "asherspassword" }
+    File.write(File.join(@data_path, "users.yml"), users.to_yaml)
   end
 
   def teardown
@@ -33,6 +36,10 @@ class AppTest < Minitest::Test
 
   def admin_session
     { "rack.session" => { username: "admin" } }
+  end
+
+  def user_session(username)
+    { "rack.session" => { username: username } }
   end
 
   def test_editing_document
@@ -131,7 +138,6 @@ class AppTest < Minitest::Test
     assert_equal "Invalid credentials", session[:error]
   end
 
-
   def test_sign_in_with_correct_credentials
     post "/sign_in", username: "admin", password:"secret"
 
@@ -150,13 +156,13 @@ class AppTest < Minitest::Test
   def test_restricting_actions_to_signed_in_user
     error_message = "You must be signed in to do that."
 
-    # 1) GET the edit page (should be blocked)
+    # GET the edit page (should be blocked)
     get "/data/changes.txt/edit"
     assert_equal 302, last_response.status
     assert_equal "/", URI(last_response["Location"]).path
     assert_equal error_message, session[:error]
 
-    # 2) POST an update to a file (should be blocked - file unchanged)
+    # POST an update to a file (should be blocked - file unchanged)
     post "/data/changes.txt/edit_file", { content: "hacked!" }
     assert_equal 302, last_response.status
     assert_equal "/", URI(last_response["Location"]).path
@@ -165,7 +171,7 @@ class AppTest < Minitest::Test
     changes_path = File.join(@data_path, "changes.txt")
     refute_includes File.read(changes_path), "hacked!"  # ensure no unauthorized write
 
-    # 3) POST delete a file (should be blocked - file still exists)
+    # POST delete a file (should be blocked - file still exists)
     target = "about.md"
     target_path = File.join(@data_path, target)
     assert File.exist?(target_path)  # precondition
@@ -174,6 +180,44 @@ class AppTest < Minitest::Test
     assert_equal 302, last_response.status
     assert_equal "/", URI(last_response["Location"]).path
     assert_equal error_message, session[:error]
-    assert File.exist?(target_path)  # ensure not deleted
+    assert File.exist?(target_path)  # ensure the file is not deleted
+  end
+
+  def test_only_admin_can_view_yaml
+    get "/" # issue a get request to index
+    assert_nil session[:username] # assert that nobody is signed in
+    refute_includes last_response.body, "users.yml" # refute that the response body includes users.yml
+
+    post "/data/users.yml/edit_file", { content: "new user: pass" }, user_session("asher") # sign in as a different user
+    assert_equal 302, last_response.status
+    refute_includes last_response.body, "users.yml" # test that users.yml is not displayed on the index page
+
+    get "/", {}, admin_session # issue a get request to index as the admin
+    assert_includes last_response.body, "users.yml" # refute that the response body includes users.yml
+  end
+
+  def test_only_admin_can_edit_yaml
+    # issue a post request to /data/users.yml/edit_file - without being signed in - and see if it's blocked
+    post "/data/users.yml/edit_file"
+    assert_nil session[:username]
+    assert_equal 302, last_response.status
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_equal "You must be signed in to do that.", session[:error]
+
+    # issue a post request to users.yml - as a user that's not the admin - and see if it's blocked
+    post "/data/users.yml/edit_file", { content: "new user: pass" }, user_session("asher")
+    assert_equal 302, last_response.status
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_equal "You must be signed in to do that.", session[:error]
+
+    # issue post request to /data/users.yml/edit_file as admin 
+    post "/data/users.yml/edit_file", { content: "new user: pass" }, admin_session
+    assert_equal 302, last_response.status
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_equal "users.yml has been updated.", session[:success]
+    
+    # test that file actually changed
+    changes_path = File.join(@data_path, "users.yml")
+    assert_includes File.read(changes_path), "new user: pass"  # ensure no unauthorized write
   end
 end
