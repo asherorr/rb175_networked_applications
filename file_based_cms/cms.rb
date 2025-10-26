@@ -5,6 +5,7 @@ require "tilt/erubi"
 require "securerandom"
 require "redcarpet"
 require "cgi"
+require "yaml"
 
 configure do
   enable :sessions
@@ -72,6 +73,18 @@ def has_valid_file_extension?(name)
   [".txt", ".md"].include?(ext)
 end
 
+def redirect_if_not_signed_in
+  if session[:username] != "admin"
+    session[:error] = "You must be signed in to do that."
+    redirect "/"
+  else
+  end
+end
+
+def signed_in_as_admin?
+  session[:username] == "admin"
+end
+
 get "/" do
   @files = get_all_files
   erb :index
@@ -91,6 +104,7 @@ get "/data/:file" do
 end
 
 get "/data/:file_name/edit" do
+  redirect_if_not_signed_in
   @file_name = params[:file_name]
   file_path = File.join(settings.data_path, @file_name)
   @contents = render_file(file_path)
@@ -102,6 +116,7 @@ get "/data/:file_name/edit" do
 end
 
 post "/data/:file_name/edit_file" do
+  redirect_if_not_signed_in
   file_path = File.join(settings.data_path, params[:file_name])
   
   File.write(file_path, params[:content])
@@ -110,11 +125,13 @@ post "/data/:file_name/edit_file" do
 end
 
 get "/new_file" do
+  redirect_if_not_signed_in
   content_type :html
   erb :new_file
 end
 
 post "/new_file" do
+  redirect_if_not_signed_in
   filename = params[:file_name].to_s.strip
 
   if filename.empty?
@@ -136,6 +153,7 @@ post "/new_file" do
 end
 
 post "/data/:file/delete" do
+  redirect_if_not_signed_in
   filename = params[:file].strip
   file_path = File.join(settings.data_path, filename)
 
@@ -154,11 +172,14 @@ get "/sign_in" do
 end
 
 post "/sign_in" do
-  username_entry = params[:username]
-  password_entry = params[:password]
+  username_entry = params[:username].to_s
+  password_entry = params[:password].to_s
 
-  if username_entry == "admin" && password_entry == "secret"
-    session[:username] = "admin"
+  users_path = File.join(settings.data_path, "users.yml")
+  users = YAML.load_file(users_path)
+
+  if users[username_entry] == password_entry
+    session[:username] = username_entry
     session[:success] = "Welcome!"
     redirect "/"
   else
@@ -171,4 +192,8 @@ post "/sign_out" do
   session[:username] = ""
   session[:success] = "You have been signed out."
   redirect "/"
+end
+
+get "/data/users.yml" do
+  redirect_if_not_signed_in
 end

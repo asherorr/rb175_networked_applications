@@ -2,15 +2,18 @@
 
 <ul>
   <% @files.each do |file| %>
-    <li>
-      <a href="/data/<%= file %>"><%= file %></a>
-      <a href="/data/<%= file %>/edit">Edit</a>
-      <form action="/data/<%= file %>/delete" method="post" style="display:inline">
-      <button type="submit" onclick="return confirm('Delete <%= file %>?')">Delete</button>
-      </form>
-    </li>
+    <% unless file == "users.yml" && !signed_in_as_admin? %>
+      <li> 
+        <a href="/data/<%= file %>"><%= file %></a>
+        <a href="/data/<%= file %>/edit">Edit</a>
+        <form action="/data/<%= file %>/delete" method="post" style="display:inline">
+        <button type="submit" onclick="return confirm('Delete <%= file %>?')">Delete</button>
+        </form>
+        <% end %>
+      </li>
   <% end %>
 </ul>
+
 <p><a href="/new_file">New File</a></p>
 <% if session[:username] == "admin" %>
     </p><em>Signed in as <%= session[:username] %></em></p>
