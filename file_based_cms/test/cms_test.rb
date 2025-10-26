@@ -184,12 +184,12 @@ class AppTest < Minitest::Test
   end
 
   def test_only_admin_can_view_yaml
-    get "/" # issue a get request to index
+    get "/" # issue get request to index
     assert_nil session[:username] # assert that nobody is signed in
     refute_includes last_response.body, "users.yml" # refute that the response body includes users.yml
 
-    post "/data/users.yml/edit_file", { content: "new user: pass" }, user_session("asher") # sign in as a different user
-    assert_equal 302, last_response.status
+    get "/", {}, user_session("asher") # issue get request to index as a non-admin user
+    assert_equal 200, last_response.status
     refute_includes last_response.body, "users.yml" # test that users.yml is not displayed on the index page
 
     get "/", {}, admin_session # issue a get request to index as the admin
@@ -218,6 +218,6 @@ class AppTest < Minitest::Test
     
     # test that file actually changed
     changes_path = File.join(@data_path, "users.yml")
-    assert_includes File.read(changes_path), "new user: pass"  # ensure no unauthorized write
+    assert_includes File.read(changes_path), "new user: pass"
   end
 end
