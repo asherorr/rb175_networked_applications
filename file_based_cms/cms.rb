@@ -6,6 +6,7 @@ require "securerandom"
 require "redcarpet"
 require "cgi"
 require "yaml"
+require "bcrypt"
 
 configure do
   enable :sessions
@@ -172,19 +173,22 @@ get "/sign_in" do
 end
 
 post "/sign_in" do
-  username_entry = params[:username].to_s
+  username_entry = params[:username].to_s.strip
   password_entry = params[:password].to_s
 
   users_path = File.join(settings.data_path, "users.yml")
-  users = YAML.load_file(users_path)
+  users = File.exist?(users_path) ? (YAML.load_file(users_path) || {}) : {}
+  users = users.transform_keys(&:to_s)
 
-  if users[username_entry] == password_entry
+  stored_hash = users[username_entry]
+
+  if stored_hash && BCrypt::Password.new(stored_hash) == password_entry
     session[:username] = username_entry
-    session[:success] = "Welcome!"
+    session[:success]  = "Welcome!"
     redirect "/"
   else
     session[:error] = "Invalid credentials"
-    redirect "/sign_in"
+    redirect "/sign_in" 
   end
 end
 

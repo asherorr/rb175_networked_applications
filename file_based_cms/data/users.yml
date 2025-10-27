@@ -1,4 +1,3 @@
-bill: billspassword
-sonia: soniaspassword
-admin: secret
-asher: asherspassword
+admin: "$2a$12$prjlERM.Rb/ew1ejSgtLtuXtdbogoufQM6DWHASE447CfSPgPbvjG"
+
+asher: "$2a$12$f0warutDhUtOH12OChxwzesgUP.QXg5HmiH98PnY4lX05dkl50JuW"
